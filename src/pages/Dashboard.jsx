@@ -8,6 +8,7 @@ import {
 import { ClipboardList, Clock, CheckCircle } from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate(); 
   const [kendala, setKendala] = useState([]); //simpen dan ambil data dari laravel  
   const [kategoriList, setKategoriList] = useState([]);
 
