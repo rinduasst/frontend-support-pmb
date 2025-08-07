@@ -23,9 +23,10 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [kendalaRes, kategoriRes] = await Promise.all([
-          api.get('http://localhost:8000/api/kendala'),
-          api.get('http://localhost:8000/api/kategori-kendala')
+          api.get('/kendala'),
+          api.get('/kategori-kendala')
         ]);
+        
         setKendala(kendalaRes.data);
         setKategoriList(kategoriRes.data);
       } catch (error) {

@@ -29,7 +29,7 @@ const TambahKendala = () => {
   useEffect(() => {
     const fetchPetugas = async () => {
       try {
-        const response = await api.get('http://localhost:8000/api/petugas');
+        const response = await api.get('/petugas');
         setDataPetugas(response.data);
       } catch (error) {
         console.error('Gagal fetch petugas:', error);
@@ -41,7 +41,7 @@ const TambahKendala = () => {
   useEffect(() => {
     const fetchKategori = async () => {
       try {
-        const response = await api.get('http://localhost:8000/api/kategori-kendala');
+        const response = await api.get('/kategori-kendala');
         setKategoriList(response.data);
       } catch (error) {
         console.error('Gagal ambil data kategori:', error); // perbaikan: pakai "error" bukan "err" dan hapus tanda kurung tutup ganda
@@ -92,7 +92,7 @@ const TambahKendala = () => {
     };
   
     try {
-      await api.post('http://localhost:8000/api/kendala', dataToSubmit);
+      await api.post('/kendala', dataToSubmit);
       alert('Data berhasil ditambahkan');
       navigate('/kendala');
     } catch (error) {
@@ -106,7 +106,7 @@ useEffect(() => {
   const fetchSaran = async () => {
     if (kodePendaftar.length >= 3) {
       try {
-        const res = await api.get(`http://localhost:8000/api/pendaftar/search?kode=${kodePendaftar}`);
+        const res = await api.get(`/pendaftar/search?kode=${kodePendaftar}`);
 
         // Hapus duplikat berdasarkan kode_pendaftar
         const uniqueSuggestions = [];

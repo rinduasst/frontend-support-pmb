@@ -8,7 +8,7 @@ const Pengguna = () => {
   const [pengguna, setPengguna] = useState([]);
 
   useEffect(() => {
-    api.get('http://localhost:8000/api/pengguna')
+    api.get('/pengguna')
       .then(response => setPengguna(response.data))
       .catch(error => console.error('Gagal ambil data:', error));
   }, []);
@@ -17,7 +17,7 @@ const Pengguna = () => {
     const confirmDelete = window.confirm('Yakin ingin menghapus pengguna ini?');
     if (confirmDelete) {
       try {
-        await api.delete(`http://localhost:8000/api/pengguna/${id}`);
+        await api.delete(`/pengguna/${id}`);
         setPengguna(pengguna.filter(item => item.id !== id));
         alert('Pengguna berhasil dihapus');
       } catch (error) {

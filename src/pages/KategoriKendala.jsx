@@ -16,7 +16,7 @@ const KategoriKendala = () => {
   // fungsi ambil data dari API
   const fetchKategori = async () => {
     try {
-      const response = await api.get('http://localhost:8000/api/kategori-kendala');
+      const response = await api.get('/kategori-kendala');
       setKategoriList(response.data);
     } catch (error) {
       console.error('Gagal ambil data:', error);
@@ -29,7 +29,7 @@ const KategoriKendala = () => {
     if (!konfirmasi) return;
 
     try {
-      await api.delete(`http://localhost:8000/api/kategori-kendala/${id}`);
+      await api.delete(`/kategori-kendala/${id}`);
       fetchKategori(); // Refresh data setelah hapus
     } catch (error) {
       console.error('Gagal menghapus:', error);

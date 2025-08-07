@@ -17,7 +17,7 @@ const EditPengguna = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.get(`http://localhost:8000/api/pengguna/${id}`);
+        const res = await api.get(`/pengguna/${id}`);
         setFormData({
           nama_pengguna: res.data.nama_pengguna,
           email: res.data.email,
@@ -40,7 +40,7 @@ const EditPengguna = () => {
     e.preventDefault();
 
     try {
-      await api.put(`http://localhost:8000/api/pengguna/${id}`, formData);
+      await api.put(`/pengguna/${id}`, formData);
       alert('Data pengguna berhasil diperbarui');
       navigate('/pengguna');
     } catch (error) {

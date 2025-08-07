@@ -11,7 +11,7 @@ const TambahKategoriKendala = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('http://localhost:8000/api/kategori-kendala', {
+      await api.post('/kategori-kendala', {
         nama_kategori: nama_kategori
       });
       alert('Berhasil tambah kategori');

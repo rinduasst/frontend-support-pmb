@@ -20,7 +20,7 @@ const UbahKategoriKendala = ()=>{
 
   const fetchKategori = async () => {
     try {
-      const response = await api.get(`http://localhost:8000/api/kategori-kendala/${id}`);
+      const response = await api.get(`/kategori-kendala/${id}`);
       setFormData({ nama_kategori: response.data.nama_kategori });
     } catch (error) {
       console.error('Gagal ambil data kategori:', error);
@@ -33,7 +33,7 @@ const UbahKategoriKendala = ()=>{
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`http://localhost:8000/api/kategori-kendala/${id}`, formData);
+      await api.put(`/kategori-kendala/${id}`, formData);
       alert('Kategori kendala berhasil diperbarui');
       navigate('/kategori-kendala');
     } catch (error) {

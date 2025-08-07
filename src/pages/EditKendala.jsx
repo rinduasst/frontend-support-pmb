@@ -40,13 +40,13 @@ const EditKendala = () => {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      const petugasRes = await api.get('http://localhost:8000/api/petugas');
+      const petugasRes = await api.get('/petugas');
       setDataPetugas(petugasRes.data);
 
-      const kategoriList = await api.get('http://localhost:8000/api/kategori-kendala');
+      const kategoriList = await api.get('/kategori-kendala');
       setKategoriList(kategoriList.data);
 
-      const kendalaRes = await api.get(`http://localhost:8000/api/kendala/${id}`);
+      const kendalaRes = await api.get(`/kendala/${id}`);
       const data = kendalaRes.data;
  
       
@@ -112,7 +112,7 @@ const handleUpdateKendala = async () => {
   };
 
   try {
-    const res = await api.put(`http://localhost:8000/api/kendala/${id}`, payload);
+    const res = await api.put(`/kendala/${id}`, payload);
     alert('Data kendala berhasil diperbarui.');
     navigate('/kendala', { state: { updated: true } });
   } catch (error) {
@@ -144,7 +144,7 @@ const handleTambahKendalaBaru = async () => {
   };
 
   try {
-    await api.post(`http://localhost:8000/api/kendala`, newKendala);
+    await api.post('/kendala', newKendala);
     alert("Kendala baru berhasil ditambahkan.");
     navigate('/kendala');
 
@@ -170,7 +170,8 @@ const [riwayatKendala, setRiwayatKendala] = useState([]);
 
 useEffect(() => {
   if (formData.kode_pendaftar) {
-    api.get(`http://localhost:8000/api/kendala/kode/${formData.kode_pendaftar}`)
+    api.get(`/kendala/kode/${formData.kode_pendaftar}`)
+
       .then(res => {
         const semuaKendala = res.data;
 

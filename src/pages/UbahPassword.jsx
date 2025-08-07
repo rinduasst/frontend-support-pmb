@@ -20,7 +20,7 @@ const UbahPassword = () => {
     }
 
     try {
-      await api.put(`http://localhost:8000/api/pengguna/${id}/ubah-password`, {
+      await api.put(`/pengguna/${id}/ubah-password`, {
         old_password: oldPassword,
         password: newPassword,
       });

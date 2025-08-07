@@ -26,7 +26,7 @@ const TambahPengguna = () => {
     e.preventDefault();
     console.log(formData);
     try {
-      const res = await api.post('http://localhost:8000/api/pengguna', formData);
+      const res = await api.post('/pengguna', formData);
       console.log("Sukses simpan:", res.data); // Tambahkan ini
       navigate('/pengguna');
     } catch (err) {
