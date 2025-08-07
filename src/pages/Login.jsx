@@ -16,7 +16,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post('/login', formData);
+      const res = await api.post('/pengguna', formData);
       localStorage.setItem('user', JSON.stringify(res.data.user));
       navigate('/');
     } catch (error) {
