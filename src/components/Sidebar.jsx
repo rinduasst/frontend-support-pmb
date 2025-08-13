@@ -24,6 +24,7 @@ const Sidebar = ({ isCollapsed }) => {
     const confirmLogout = window.confirm('Apakah Anda yakin ingin keluar?');
     if (confirmLogout) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       navigate('/login');
     }
   };

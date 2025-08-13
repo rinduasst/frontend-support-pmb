@@ -25,7 +25,7 @@ import UbahKategoriKendala from './pages/UbahKategoriKendala';
 const App = () => {
   return (
           <Routes>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/kendala" element={<DaftarKendala />} />
             <Route path="/pengguna" element={<Pengguna />} />
             <Route path="/kendala/tambah" element={<TambahKendala />} />
