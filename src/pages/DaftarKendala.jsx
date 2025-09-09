@@ -75,7 +75,7 @@ const logoRef = useRef(null);
 
   const fetchPetugas = async () => {
     try {
-      const response = await api.get("/petugas");
+      const response = await api.get('/petugas');
       setPetugasList(response.data);
     } catch (error) {
       console.error("Gagal ambil data petugas:", error);
@@ -86,7 +86,7 @@ const logoRef = useRef(null);
   useEffect(() => {
     const fetchKategori = async () => {
       try {
-        const response = await api.get("/kategori-kendala");
+        const response = await api.get('/kategori-kendala');
         setKategoriList(response.data);
       } catch (error) {
         console.error("Gagal mengambil data kategori:", error);
