@@ -39,7 +39,7 @@ const logoRef = useRef(null);
 
   const fetchKendala = async () => {
     try {
-      const response = await api.get('http://localhost:8000/api/kendala');
+      const response = await api.get("/kendala");
        // Urutkan dari yang terbaru ke lama (berdasarkan ID atau tanggal)
     const sorted = response.data.sort((a, b) => {
       return new Date(b.id) - new Date(a.id); // Berdasarkan tanggal penanganan
@@ -53,10 +53,29 @@ const logoRef = useRef(null);
       setLoading(false);
     }
   };
+  // const fetchKendala = async (page = 1) => {
+  //   try {
+  //     const response = await api.get(`/kendala?page=${page}`);
+  
+  //     // Ambil data dari response.data.data (bukan response.data langsung)
+  //     const data = response.data.data;
+  
+  //     // Urutkan dari terbaru
+  //     const sorted = data.sort((a, b) => b.id - a.id);
+  
+  //     setKendala(sorted);
+  //     setCurrentPage(response.data.current_page); // simpan page sekarang
+  //   } catch (error) {
+  //     console.error('Ada error:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
 
   const fetchPetugas = async () => {
     try {
-      const response = await api.get('http://localhost:8000/api/petugas');
+      const response = await api.get("/petugas");
       setPetugasList(response.data);
     } catch (error) {
       console.error("Gagal ambil data petugas:", error);
@@ -67,7 +86,7 @@ const logoRef = useRef(null);
   useEffect(() => {
     const fetchKategori = async () => {
       try {
-        const response = await api.get('http://localhost:8000/api/kategori-kendala');
+        const response = await api.get("/kategori-kendala");
         setKategoriList(response.data);
       } catch (error) {
         console.error("Gagal mengambil data kategori:", error);
@@ -115,7 +134,7 @@ const logoRef = useRef(null);
           val === undefined || val === null ? '' : String(val).trim();
         
         try {
-          await api.post('http://localhost:8000/api/kendala', {
+          await api.post("/kendala" , {
             status_pendaftar: isPendaftar ? 'pendaftar' : 'peminat',
             kode_pendaftar: isPendaftar ? safeString(kodePendaftar) : null,
             nama: safeString(row['Nama']),
@@ -385,7 +404,7 @@ const logoRef = useRef(null);
     const confirmDelete = window.confirm('Yakin ingin menghapus data ini?');
     if (confirmDelete) {
       try {
-        await api.delete(`http://localhost:8000/api/kendala/${id}`);
+        await api.delete("/kendala/${id}");
         setKendala(kendala.filter(item => item.id !== id));
         alert('Data berhasil dihapus');
       } catch (error) {
