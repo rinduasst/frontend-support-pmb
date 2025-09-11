@@ -404,7 +404,7 @@ const logoRef = useRef(null);
     const confirmDelete = window.confirm('Yakin ingin menghapus data ini?');
     if (confirmDelete) {
       try {
-        await api.delete("/kendala/${id}");
+        await api.delete(`/kendala/${id}`);
         setKendala(kendala.filter(item => item.id !== id));
         alert('Data berhasil dihapus');
       } catch (error) {
