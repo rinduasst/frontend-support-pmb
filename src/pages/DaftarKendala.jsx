@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { FaTimes } from "react-icons/fa";
 
 const DaftarKendala = () => {
   const [kendala, setKendala] = useState([]);
@@ -436,10 +437,12 @@ const logoRef = useRef(null);
       <img ref={logoRef} src="/logouika.png" alt="Logo UIKA" style={{ display: 'none' }} crossOrigin="anonymous" />
       <div className="space-y-6">
   {/* HEADER DAN TOMBOL AKSI */}
-<div className="bg-white rounded-lg shadow-md p-8">
-  <div className="flex justify-between items-center mb-6">
-    <h2 className="text-2xl font-bold text-gray-800">Daftar Kendala</h2>
-    <div className="flex flex-wrap gap-2 items-center">
+  <div className="bg-white rounded-lg shadow-md p-4 pb-2 max-w-full max-h-[600px] overflow-y-auto">
+
+
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold text-gray-800">Daftar Kendala</h2>
+          <div className="flex flex-wrap gap-2 items-center">
               <button
                 onClick={() => setShowImportModal(true)}
                 className="bg-purple-500 hover:bg-purple-700 text-white text-sm px-4 py-3 rounded-lg transition"
@@ -447,42 +450,52 @@ const logoRef = useRef(null);
                 Import Excel
               </button>
               <div className="relative">
-  <button
-    onClick={() => setShowExportOptions(true)}
-    className="bg-blue-600 text-white text-sm px-4 py-3 rounded-lg transition hover:bg-blue-700"
-  >
-    Export File 
-  </button>
+          <button
+            onClick={() => setShowExportOptions(true)}
+            className="bg-blue-600 text-white text-sm px-4 py-3 rounded-lg transition hover:bg-blue-700"
+          >
+            Export File 
+          </button>
 
-  {showExportOptions && (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-      <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl relative">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Pilih Format File:</h3>
+          {showExportOptions && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+              <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl relative">
+              {/* Tombol X di pojok kanan atas */}
+              <button
+                onClick={() => {
+                  setShowExportOptions(false);
+                  navigate('/kendala');
+                }}
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              >
+                <FaTimes size={18} />
+              </button>
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Pilih Format File:</h3>
 
-        <div className="space-y-2">
-        <button
+                <div className="space-y-2">
+                <button
           className="block w-full text-left px-4 py-2 rounded hover:bg-blue-100"
-          onClick={handleExport} // langsung panggil fungsi export Excel
+          onClick={() => {
+            handleExport(); // jalankan export excel
+            setShowExportOptions(false); // popup langsung hilang
+          }}
         >
           Excel (.xlsx)
         </button>
+
         <button
           className="block w-full text-left px-4 py-2 rounded hover:bg-blue-100"
-          onClick={handleExportPDF} // langsung panggil fungsi export PDF
+          onClick={() => {
+            handleExportPDF(); // jalankan export pdf
+            setShowExportOptions(false); // popup langsung hilang
+          }}
         >
           PDF (.pdf)
         </button>
+
       </div>
         {/* Tombol Batal */}
-        <button
-          onClick={() => {
-            setShowExportOptions(false);
-            navigate('/kendala');
-          }}
-          className="mt-2 bg-gray-300 hover:bg-gray-400 text-gray-800 w-full py-2 rounded"
-        >
-          Batal
-        </button>
+       
       </div>
     </div>
   )}
@@ -494,11 +507,11 @@ const logoRef = useRef(null);
               </Link>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3 mb-4">
+          <div className="flex flex-nowrap gap-3 mb-4 overflow-x-auto">
         <input
           type="text"
           placeholder="Cari..."
-          className="w-full sm:w-[200px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
+          className="w-[180px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -529,7 +542,7 @@ const logoRef = useRef(null);
         <select
           value={filterStatusProses}
           onChange={(e) => setFilterStatusProses(e.target.value)}
-          className="w-full sm:w-[200px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
+          className="w-[180px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
         >
           <option value="">Pilih Status</option>
           <option value="Progres">Diproses</option>
@@ -539,7 +552,7 @@ const logoRef = useRef(null);
         <select
           value={filterBulan}
           onChange={(e) => setFilterBulan(e.target.value)}
-          className="w-full sm:w-[200px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
+          className="w-[180px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
         >
           <option value="">Pilih Bulan</option>
           {Array.from({ length: 12 }, (_, i) => (
@@ -552,7 +565,7 @@ const logoRef = useRef(null);
         <select
           value={filterTahun}
           onChange={(e) => setFilterTahun(e.target.value)}
-          className="w-full sm:w-[200px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
+          className="w-[180px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
         >
           <option value="">Pilih Tahun</option>
           {[2023, 2024, 2025].map((tahun) => (
@@ -568,123 +581,119 @@ const logoRef = useRef(null);
             <div className="text-center py-10 text-gray-500">Memuat data...</div>
           ) : (
             <div className="">
-      <div className="overflow-y-auto max-h-[600px] rounded border">
-    <table className="min-w-full divide-y divide-gray-200 text-sm">
+     <div className="overflow-y-auto max-h-[600px] rounded border">
+  <table className="w-full divide-y divide-gray-200 text-xs">
     <thead className="bg-gray-100 sticky top-0 z-10">
-            <tr>
-                    <th className="p-3">No</th>
-                    <th className="p-3">Status Pendaftar</th>
-                    <th className="p-3">Kode</th>
-                    <th className="p-3">Kategori Kendala</th>
-                    <th className="p-3">Nama</th>
-                    <th className="p-3">Kendala</th>
-                    <th className="p-3">Tindak Lanjut</th>
-                    <th className="p-3">No WA</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Penanganan</th>
-                    <th className="p-3">Selesai</th>
-                    {/* min-w-[120px] whitespace-nowrap */}
-                    <th className="p-3">Petugas</th>
-                    <th className="p-3">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="text-gray-800 text-sm">
-                  {paginatedKendala.length > 0 ? (
-                    paginatedKendala.map((item, idx) => (
-                      <tr key={item.id} className="border-t">
-                        <td className="p-3 text-center">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                        <td className="p-3 capitalize">{item.status_pendaftar}</td>
-                        {/* <td>{item.kategori?.nama_kategori || '-'}</td> */}
-                        <td className="p-3 capitalize">{item.kode_pendaftar}</td>
-                        <td className="p-3 capitalize">{item.kategori?.nama_kategori }</td>
-                        <td className="p-3 capitalize">{item.nama}</td>
-                        <td className="p-7 normal-case">{item.kendala}</td>
-                        <td className="p-7 normal-case">{item.tindak_lanjut}</td>
-                        <td className="p-3">{item.no_wa}</td>
-                        
-                        <td className="p-3">
-                          {item.status === 'Selesai' ? (
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                              Selesai
-                            </span>
-                          ) : (
-                            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
-                              Diproses
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3">{item.tanggal_penanganan}</td>
-                        <td className="p-3">{item.tanggal_selesai}</td>
-                        <td className="p-3 text-center">
-                          {item.petugas?.nama_pengguna ? (
-                            <div className="bg-gray-200 inline-flex items-center px-2 py-1 rounded-full text-xs">
-                              <UserIcon className="w-4 h-4 mr-1 text-gray-700" />
-                              {item.petugas.nama_pengguna}
-                            </div>
-                          ) : (
-                            <span className="italic text-gray-400">Tidak Ada</span>
-                          )}
-                        </td>
-                        <td className="p-3 flex gap-2 justify-center">
-                          <Link to={`/kendala/edit/${item.id}`}>
-                            <button className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-2 rounded-full">
-                              <PencilIcon className="h-4 w-4" />
-                            </button>
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-full"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="13" className="py-6 text-center text-gray-500">
-                        Tidak ada data kendala ditemukan.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+      <tr>
+        <th className="px-2 py-1">No</th>
+        <th className="px-2 py-1">Status Pendaftar</th>
+        <th className="px-2 py-1">Kode</th>
+        <th className="px-2 py-1">Kategori</th>
+        <th className="px-2 py-1">Nama</th>
+        <th className="px-2 py-1">Kendala</th>
+        <th className="px-2 py-1">Tindak Lanjut</th>
+        <th className="px-2 py-1">No WA</th>
+        <th className="px-2 py-1">Status</th>
+        <th className="px-2 py-1">Penanganan</th>
+        <th className="px-2 py-1">Selesai</th>
+        <th className="px-2 py-1">Petugas</th>
+        <th className="px-2 py-1">Aksi</th>
+      </tr>
+    </thead>
+    <tbody className="text-gray-800">
+      {paginatedKendala.map((item, idx) => (
+        <tr key={item.id} className="border-t">
+          <td className="px-2 py-1 text-center">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+          <td className="px-2 py-1 capitalize">{item.status_pendaftar}</td>
+          <td className="px-2 py-1 capitalize">{item.kode_pendaftar}</td>
+          <td className="px-2 py-1 capitalize">{item.kategori?.nama_kategori}</td>
+          <td className="px-2 py-1 capitalize">{item.nama}</td>
+          <td className="px-4 py-2 text-sm text-gray-700 break-words max-w-xs"> {item.kendala}</td>
+          <td className="px-4 py-2 text-sm text-gray-700 break-words max-w-xs"> {item.tindak_lanjut}</td>
+          <td className="px-2 py-1">{item.no_wa}</td>
+          <td className="px-2 py-1">
+            {item.status === 'Selesai' ? (
+              <span className="bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
+                Selesai
+              </span>
+            ) : (
+              <span className="bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
+                Diproses
+              </span>
+            )}
+          </td>
+          <td className="px-2 py-1">{item.tanggal_penanganan}</td>
+          <td className="px-2 py-1">{item.tanggal_selesai}</td>
+          <td className="px-2 py-1 text-center">
+            {item.petugas?.nama_pengguna ? (
+              <div className="bg-gray-200 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px]">
+                <UserIcon className="w-3 h-3 mr-1 text-gray-700" />
+                {item.petugas.nama_pengguna}
+              </div>
+            ) : (
+              <span className="italic text-gray-400">Tidak Ada</span>
+            )}
+          </td>
+          <td className="px-2 py-1 flex gap-1 justify-center">
+            <Link to={`/kendala/edit/${item.id}`}>
+              <button className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-1.5 rounded-full">
+                <PencilIcon className="h-3 w-3" />
+              </button>
+            </Link>
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="bg-red-100 hover:bg-red-200 text-red-700 p-1.5 rounded-full"
+            >
+              <TrashIcon className="h-3 w-3" />
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+         
             </div>
           )}
         </div>
         {/* Pagination */}
-        <div className="flex justify-center items-center mt-4 space-x-2">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                >
-                  Prev
-                </button>
-                {[...Array(totalPages)].map((_, i) => {
-              const isActive = currentPage === i + 1;
-              return (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  ref={isActive ? activePageRef : null}
-                  className={`px-3 py-1 rounded text-sm ${
-                    isActive ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              );
-              })}
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
+              <div className="flex justify-center items-center mt-1 space-x-1">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-2 py-1 bg-gray-200 rounded text-xs disabled:opacity-50"
+          >
+            Sebelumnya
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => {
+            const isActive = currentPage === i + 1;
+            return (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                ref={isActive ? activePageRef : null}
+                className={`px-2 py-1 rounded text-xs ${
+                  isActive
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200'
+                }`}
+              >
+                {i + 1}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-2 py-1 bg-gray-200 rounded text-xs disabled:opacity-50"
+          >
+            Selanjutnya
+          </button>
+        </div>
+
       </div>
   
       {/* Modal Import Excel */}

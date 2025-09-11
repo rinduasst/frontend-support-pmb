@@ -41,7 +41,7 @@ const KategoriKendala = () => {
     <Layout>
       <div className="bg-white rounded-lg shadow-md p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <h2 className="text-xl font-semibold">Daftar Kategori Kendala</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Daftar Kategori Kendala</h2>
           <Link to="/kategori-kendala/tambah">
             <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
               + Tambah Kategori

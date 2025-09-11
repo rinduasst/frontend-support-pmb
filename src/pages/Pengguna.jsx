@@ -32,7 +32,7 @@ const Pengguna = () => {
      
       <div className="bg-white rounded-lg shadow-md p-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <h2 className="text-xl font-semibold">Daftar Pengguna</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Daftar Pengguna</h2>
             <Link to="/pengguna/tambah">
               <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                 + Tambah Pengguna
