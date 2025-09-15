@@ -294,7 +294,7 @@ const logoRef = useRef(null);
       startY: 40,
       head: [[
         "No", "Status Pendaftar", "Kode Pendaftar", "Nama", "Kendala", "Tindak Lanjut",
-        "No WA", "Status", "Tanggal Penanganan", "Tanggal Selesai", "Petugas"
+        "No WA", "Status", "Tanggal   Penanganan", "Tanggal Selesai", "Petugas"
       ]],
       body: tableData,
       styles: { fontSize: 8 },
