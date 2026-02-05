@@ -568,7 +568,7 @@ const logoRef = useRef(null);
           className="w-[180px] px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring focus:border-blue-400"
         >
           <option value="">Pilih Tahun</option>
-          {[2023, 2024, 2025].map((tahun) => (
+          {[2023, 2024, 2025, 2026].map((tahun) => (
             <option key={tahun} value={tahun}>
               {tahun}
             </option>
