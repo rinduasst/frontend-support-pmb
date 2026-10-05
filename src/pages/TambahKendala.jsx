@@ -7,7 +7,10 @@ const TambahKendala = () => {
   const [saranKode, setSaranKode] = useState([]);
   const [kodePendaftar, setKodePendaftar] = useState('');
   const [riwayatKendala, setRiwayatKendala] = useState([]);
-  const [status_pendaftar, setStatus_pendaftar] = useState('');    
+  const [status_pendaftar, setStatus_pendaftar] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingData, setPendingData] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [dataPetugas, setDataPetugas] = useState([]);
   const navigate = useNavigate();
   const [kategoriList, setKategoriList] = useState([]);
@@ -94,14 +97,24 @@ const TambahKendala = () => {
         formData.status_pendaftar === 'pendaftar' ? formData.kode_pendaftar : '',
       petugas_id: formData.petugas_id ? parseInt(formData.petugas_id) : null,
     };
-  
+
+    setPendingData(dataToSubmit);
+    setShowConfirm(true);
+  };
+
+  const handleConfirmSave = async () => {
+    setIsSaving(true);
     try {
-      await api.post('/kendala', dataToSubmit);
+      await api.post('/kendala', pendingData);
+      setShowConfirm(false);
       alert('Data berhasil ditambahkan');
       navigate('/kendala');
     } catch (error) {
       console.error('Gagal menambahkan kendala', JSON.stringify(error.response?.data, null, 2));
+      setShowConfirm(false);
       alert('Gagal menambahkan data');
+    } finally {
+      setIsSaving(false);
     }
   };
   
@@ -371,6 +384,35 @@ const TambahKendala = () => {
             </div>
           </form>
         </div>
+
+        {showConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-2">Konfirmasi Simpan</h3>
+              <p className="text-gray-600 mb-6">
+                Yakin ingin menyimpan data kendala ini? Notifikasi WhatsApp pengingat akan otomatis dikirim ke nomor yang diisi.
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(false)}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmSave}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isSaving ? 'Menyimpan...' : 'Ya, Simpan'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </Layout>
   );
 };
