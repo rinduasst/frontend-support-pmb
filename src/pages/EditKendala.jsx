@@ -28,6 +28,8 @@ const EditKendala = () => {
   const [dataPetugas, setDataPetugas] = useState([]);
   const [logPetugas, setLogPetugas] = useState([]);
   const [KategoriList, setKategoriList] = useState([]);
+  const [confirmAction, setConfirmAction] = useState(null); // 'update' | 'new' | null
+  const [isSaving, setIsSaving] = useState(false);
   const [formKendalaBaru, setFormKendalaBaru] = useState({
     kendala: '',
     tindak_lanjut: '',
@@ -86,14 +88,18 @@ const handleChange = (e) => {
   setFormData({ ...formData, [name]: value });
 };
 
-const handleUpdateKendala = async () => {
+const handleUpdateKendala = () => {
   if (formData.status_pendaftar === 'pendaftar') {
     if (!formData.kode_pendaftar || isNaN(formData.kode_pendaftar)) {
       alert('Kode pendaftar wajib diisi dan harus berupa angka.');
       return;
     }
   }
-  
+
+  setConfirmAction('update');
+};
+
+const doUpdateKendala = async () => {
   const payload = {
     status_pendaftar: formData.status_pendaftar,
     kode_pendaftar: formData.status_pendaftar === 'pendaftar' ? formData.kode_pendaftar : null,
@@ -110,6 +116,7 @@ const handleUpdateKendala = async () => {
     kategori_id: formData.kategori_id,
   };
 
+  setIsSaving(true);
   try {
     await api.put(`/kendala/${id}`, payload);
     alert('Data kendala berhasil diperbarui.');
@@ -117,15 +124,22 @@ const handleUpdateKendala = async () => {
   } catch (error) {
     console.error('Gagal update data kendala', error.response?.data);
     alert('Gagal memperbarui data kendala.');
+  } finally {
+    setIsSaving(false);
+    setConfirmAction(null);
   }
 };
 
-const handleTambahKendalaBaru = async () => {
+const handleTambahKendalaBaru = () => {
   if (!formKendalaBaru.kendala?.trim()) {
     alert("Isi kendala baru terlebih dahulu.");
     return;
   }
 
+  setConfirmAction('new');
+};
+
+const doTambahKendalaBaru = async () => {
   const today = new Date().toISOString().split('T')[0];
 
   const newKendala = {
@@ -144,6 +158,7 @@ const handleTambahKendalaBaru = async () => {
     kategori_id: formKendalaBaru.kategori_id || null
   };
 
+  setIsSaving(true);
   try {
     await api.post('/kendala', newKendala);
     alert("Kendala baru berhasil ditambahkan.");
@@ -164,7 +179,21 @@ const handleTambahKendalaBaru = async () => {
   } catch (error) {
     console.error('Gagal menambahkan kendala baru', error.response?.data);
     alert('Gagal menambahkan kendala.');
+  } finally {
+    setIsSaving(false);
+    setConfirmAction(null);
   }
+};
+
+const confirmLabels = {
+  update: {
+    title: 'Konfirmasi Simpan Perubahan',
+    desc: 'Yakin ingin menyimpan perubahan data kendala ini? Notifikasi WhatsApp pengingat akan otomatis dikirim ke nomor yang diisi.',
+  },
+  new: {
+    title: 'Konfirmasi Tambah Kendala Baru',
+    desc: 'Yakin ingin menambahkan kendala baru ini ke riwayat? Notifikasi WhatsApp pengingat akan otomatis dikirim ke nomor yang diisi.',
+  },
 };
 const [riwayatKendala, setRiwayatKendala] = useState([]);
 
@@ -500,6 +529,33 @@ useEffect(() => {
   )}
   </div>
 )}
+
+        {confirmAction && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-2">{confirmLabels[confirmAction].title}</h3>
+              <p className="text-gray-600 mb-6">{confirmLabels[confirmAction].desc}</p>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmAction(null)}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmAction === 'update' ? doUpdateKendala : doTambahKendalaBaru}
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isSaving ? 'Menyimpan...' : 'Ya, Simpan'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   </Layout>
   );
