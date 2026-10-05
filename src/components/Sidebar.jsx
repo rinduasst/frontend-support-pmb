@@ -28,9 +28,10 @@ const Sidebar = ({ isCollapsed }) => {
       navigate('/login');
     }
   };
+
   const subLinkClass = ({ isActive }) =>
-  (isActive ? 'text-blue-600 font-semibold' : 'text-black') +
-  ' flex items-center gap-2 px-4 py-1 rounded hover:bg-gray-100 transition-all duration-200';
+    (isActive ? 'text-blue-600 font-semibold' : 'text-black') +
+    ' flex items-center gap-2 px-4 py-1 rounded hover:bg-gray-100 transition-all duration-200';
 
   const linkClass = ({ isActive }) =>
     (isActive
@@ -39,8 +40,10 @@ const Sidebar = ({ isCollapsed }) => {
     ' flex items-center gap-2 px-4 py-2 rounded transition-all duration-200';
 
   return (
-    <aside className={`bg-white shadow-md ${isCollapsed ? 'w-20' : 'w-60'} flex-shrink-0`} 
->
+    // --- PERBAIKAN: Tambahkan h-screen, sticky, top-0, left-0, z-40, overflow-y-auto ---
+    <aside 
+      className={`bg-white shadow-md ${isCollapsed ? 'w-20' : 'w-60'} flex-shrink-0 h-screen sticky top-0 left-0 overflow-y-auto z-40 transition-all duration-300`} 
+    >
       {/* Logo */}
       <div className="pt-6 mb-6 text-center">
         <img
@@ -51,7 +54,7 @@ const Sidebar = ({ isCollapsed }) => {
       </div>
 
       {/* Menu */}
-      <ul className="space-y-2 px-2">
+      <ul className="space-y-2 px-2 pb-6">
         <li>
           <NavLink to="/" end className={linkClass}>
             <FaTachometerAlt />
@@ -87,9 +90,9 @@ const Sidebar = ({ isCollapsed }) => {
             <ul className="ml-8 mt-1 space-y-1 text-sm">
               <li>
                 <NavLink to="/kategori-kendala" className={subLinkClass}>
-            <FaChevronRight />
-            {!isCollapsed && 'Kategori Kendala'}
-          </NavLink>
+                  <FaChevronRight />
+                  {!isCollapsed && 'Kategori Kendala'}
+                </NavLink>
               </li>
             </ul>
           )}

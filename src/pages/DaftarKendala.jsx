@@ -24,9 +24,9 @@ const DaftarKendala = () => {
   const location = useLocation();
   const activePageRef = useRef(null);
   const navigate= useNavigate();
-  const [importProgres, setImportProgres] = useState(0); // nilai 0–100
-  const [importStatusText, setImportStatusText] = useState(''); // teks deskripsi progres
-  const [showExportOptions, setShowExportOptions] = useState(false); //pilihan format ekspor
+  const [importProgres, setImportProgres] = useState(0); 
+  const [importStatusText, setImportStatusText] = useState(''); 
+  const [showExportOptions, setShowExportOptions] = useState(false); 
 
 const logoRef = useRef(null);
   useEffect(() => {
@@ -41,11 +41,15 @@ const logoRef = useRef(null);
   const fetchKendala = async () => {
     try {
       const response = await api.get("/kendala");
-       // Urutkan dari yang terbaru ke lama (berdasarkan ID atau tanggal)
-    const sorted = response.data.sort((a, b) => {
-      return new Date(b.id) - new Date(a.id); // Berdasarkan tanggal penanganan
-      // return b.id - a.id; // ASCENDING → FIFO // DESCENDING → LIFO
-    });
+      
+      // --- PERBAIKAN: Penanganan Error Array vs Object ---
+      const dataKendala = Array.isArray(response.data) 
+        ? response.data 
+        : (response.data?.data || []);
+
+      const sorted = dataKendala.sort((a, b) => {
+        return new Date(b.id) - new Date(a.id); 
+      });
 
       setKendala(sorted);
     } catch (error) {
@@ -54,25 +58,6 @@ const logoRef = useRef(null);
       setLoading(false);
     }
   };
-  // const fetchKendala = async (page = 1) => {
-  //   try {
-  //     const response = await api.get(`/kendala?page=${page}`);
-  
-  //     // Ambil data dari response.data.data (bukan response.data langsung)
-  //     const data = response.data.data;
-  
-  //     // Urutkan dari terbaru
-  //     const sorted = data.sort((a, b) => b.id - a.id);
-  
-  //     setKendala(sorted);
-  //     setCurrentPage(response.data.current_page); // simpan page sekarang
-  //   } catch (error) {
-  //     console.error('Ada error:', error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  
 
   const fetchPetugas = async () => {
     try {
@@ -83,12 +68,17 @@ const logoRef = useRef(null);
     }
   };
   
-
   useEffect(() => {
     const fetchKategori = async () => {
       try {
         const response = await api.get('/kategori-kendala');
-        setKategoriList(response.data);
+        
+        // --- PERBAIKAN: Penanganan Error Array vs Object ---
+        const dataKategori = Array.isArray(response.data)
+          ? response.data
+          : (response.data?.data || []);
+
+        setKategoriList(dataKategori);
       } catch (error) {
         console.error("Gagal mengambil data kategori:", error);
       }
@@ -188,6 +178,7 @@ const logoRef = useRef(null);
   const [filterBulan, setFilterBulan] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
   const [filterKategori,setFilterKategori]=useState('');
+  
   const normalizeStatus = (status) => {
     if (!status) return '';
     const normalized = status.toLowerCase();
@@ -200,12 +191,10 @@ const logoRef = useRef(null);
     (item.nama || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.kendala || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (item.no_wa || '').toLowerCase().includes(searchTerm.toLowerCase());  
-      // item.filterKategori?.toLowerCase().includes(searchTerm.toLowerCase())
   
     const statusPendaftarMatch = filterStatusPendaftar === '' || item.status_pendaftar === filterStatusPendaftar;
     const statusProsesMatch = filterStatusProses === '' || normalizeStatus(item.status) === filterStatusProses;
     const kategoriMatch = filterKategori === '' || item.kategori_id === parseInt(filterKategori);
-    const tanggal = new Date(item.tanggal_penanganan);
     let bulanMatch = true;
     let tahunMatch = true;
     
@@ -228,12 +217,13 @@ const logoRef = useRef(null);
     return searchMatch && statusPendaftarMatch && statusProsesMatch && kategoriMatch&& bulanMatch && tahunMatch;
   }); 
 
-
   const totalPages = Math.ceil(filteredKendala.length / itemsPerPage);
   const paginatedKendala = filteredKendala.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  // --- UPDATE: Fungsi Export PDF ---
   const handleExportPDF = () => {
     const img = logoRef.current;
   
@@ -253,10 +243,8 @@ const logoRef = useRef(null);
   
     const pageWidth = doc.internal.pageSize.getWidth();
     const currentDate = new Date();
-    const monthYear = currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
     const dateToday = currentDate.toLocaleDateString('id-ID');
     const year = currentDate.getFullYear();
-  
   
     doc.addImage(logoBase64, 'PNG', 10, 8, 25, 25);
 
@@ -280,6 +268,8 @@ const logoRef = useRef(null);
       index + 1,
       item.status_pendaftar || '-',
       item.kode_pendaftar || '-',
+      item.fakultas || '-',             // --- TAMBAHAN BARU ---
+      item.pilihan_pertama || '-',      // --- TAMBAHAN BARU ---
       item.nama || '-',
       item.kendala || '-',
       item.tindak_lanjut || '-',
@@ -293,31 +283,32 @@ const logoRef = useRef(null);
     autoTable(doc, {
       startY: 40,
       head: [[
-        "No", "Status Pendaftar", "Kode Pendaftar", "Nama", "Kendala", "Tindak Lanjut",
-        "No WA", "Status", "Tanggal   Penanganan", "Tanggal Selesai", "Petugas"
+        "No", "Status Pendaftar", "Kode Pendaftar", "Fakultas", "Prodi", "Nama", "Kendala", "Tindak Lanjut",
+        "No WA", "Status", "Penanganan", "Selesai", "Petugas"
       ]],
       body: tableData,
-      styles: { fontSize: 8 },
+      styles: { fontSize: 7 }, // Dikecilkan sedikit agar muat
       columnStyles: {
-        0: { cellWidth: 10 }, 
-        1: { cellWidth: 20 },
-        2: { cellWidth: 'auto' },
-        3: { cellWidth: 'auto' },
-        4: { cellWidth: 'auto' },
-        5: { cellWidth: 'auto' },
-        6: { cellWidth: 30 },
-        7: { cellWidth: 15 },
-        8: { cellWidth: 'auto' },
-        9: { cellWidth: 20 },
-        10: { cellWidth: 20 } 
+        0: { cellWidth: 8 }, 
+        1: { cellWidth: 15 },
+        2: { cellWidth: 20 },
+        3: { cellWidth: 15 },   // Fakultas
+        4: { cellWidth: 20 },   // Prodi
+        5: { cellWidth: 20 },   // Nama
+        6: { cellWidth: 'auto' }, // Kendala
+        7: { cellWidth: 'auto' }, // Tindak Lanjut
+        8: { cellWidth: 20 },   // WA
+        9: { cellWidth: 15 },   // Status
+        10: { cellWidth: 18 },  // Tgl Penanganan
+        11: { cellWidth: 18 },  // Tgl Selesai
+        12: { cellWidth: 20 }   // Petugas
       }
-      
     });
   
-    // doc.save(`Laporan_PMB_${monthYear.replace(/\s/g, "_")}.pdf`);
     doc.save(`Laporan_PMB_${year}.pdf`);
   };
 
+  // --- UPDATE: Fungsi Export Excel ---
   const handleExport = async () => {
     const currentDate = new Date();
     const monthYear = currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
@@ -325,23 +316,23 @@ const logoRef = useRef(null);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Daftar Kendala');
   
-    // Judul
-    worksheet.mergeCells('A1:K1');
+    // Judul (Diubah menjadi merge sampai M1 karena kolom bertambah)
+    worksheet.mergeCells('A1:M1');
     worksheet.getCell('A1').value = 'Laporan PMB';
     worksheet.getCell('A1').font = { size: 14, bold: true };
     worksheet.getCell('A1').alignment = { horizontal: 'center' };
   
-    worksheet.mergeCells('A2:K2');
+    worksheet.mergeCells('A2:M2');
     worksheet.getCell('A2').value = 'Tim Validasi dan Pengolah Data - Layanan Informasi Digital dan Penanganan Kendala Sistem';
     worksheet.getCell('A2').alignment = { horizontal: 'center' };
   
-    worksheet.mergeCells('A3:K3');
+    worksheet.mergeCells('A3:M3');
     worksheet.getCell('A3').value = `Periode: ${monthYear}`;
     worksheet.getCell('A3').alignment = { horizontal: 'center' };
   
     // Header
     const header = [
-      "No", "Status Pendaftar", "Kode Pendaftar", "Nama", "Kendala", "Tindak Lanjut",
+      "No", "Status Pendaftar", "Kode Pendaftar", "Fakultas", "Pilihan Pertama", "Nama", "Kendala", "Tindak Lanjut",
       "No WA", "Status", "Tanggal Penanganan", "Tanggal Selesai", "Petugas"
     ];
     worksheet.addRow([]);
@@ -353,7 +344,7 @@ const logoRef = useRef(null);
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: 'FFCCE5FF' }, // Biru muda
+        fgColor: { argb: 'FFCCE5FF' }, 
       };
       cell.border = {
         top: { style: 'thin' },
@@ -369,6 +360,8 @@ const logoRef = useRef(null);
         index + 1,
         item.status_pendaftar || '-',
         item.kode_pendaftar || '-',
+        item.fakultas || '-',               // --- TAMBAHAN BARU ---
+        item.pilihan_pertama || '-',        // --- TAMBAHAN BARU ---
         item.nama || '-',
         item.kendala || '-',
         item.tindak_lanjut || '-',
@@ -385,6 +378,8 @@ const logoRef = useRef(null);
       { header: 'No', key: 'no', width: 5 },
       { header: 'Status Pendaftar', key: 'status_pendaftar', width: 20 },
       { header: 'Kode Pendaftar', key: 'kode_pendaftar', width: 20 },
+      { header: 'Fakultas', key: 'fakultas', width: 15 },             // --- TAMBAHAN BARU ---
+      { header: 'Pilihan Pertama', key: 'pilihan_pertama', width: 25 },// --- TAMBAHAN BARU ---
       { header: 'Nama', key: 'nama', width: 25 },
       { header: 'Kendala', key: 'kendala', width: 30 },
       { header: 'Tindak Lanjut', key: 'tindak_lanjut', width: 30 },
@@ -394,8 +389,6 @@ const logoRef = useRef(null);
       { header: 'Tanggal Selesai', key: 'tanggal_selesai', width: 20 },
       { header: 'Petugas', key: 'petugas', width: 20 },
     ];
-    
-   
   
     const buffer = await workbook.xlsx.writeBuffer();
     saveAs(new Blob([buffer]), `Laporan_PMB_${currentDate.getFullYear()}.xlsx`);
@@ -415,30 +408,18 @@ const logoRef = useRef(null);
     }
   };
 
-  const getStatusBadge = (status) => {
-      const normalized = normalizeStatus(status);
-      if (normalized === 'Progres') {
-      return <span className="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-semibold">Progres</span>;
-    }
-    if (status === 'Selesai') {
-      return <span className="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold">Selesai</span>;
-    }
-    return status;
-  };
   useEffect(() => {
     if (activePageRef.current) {
       activePageRef.current.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
   }, [currentPage]);
   
-  
   return (
     <Layout>
       <img ref={logoRef} src="/logouika.png" alt="Logo UIKA" style={{ display: 'none' }} crossOrigin="anonymous" />
       <div className="space-y-6">
   {/* HEADER DAN TOMBOL AKSI */}
-  <div className="bg-white rounded-lg shadow-md p-4 pb-2 max-w-full max-h-[600px] overflow-y-auto">
-
+  <div className="bg-white rounded-lg shadow-md p-4 pb-2 max-w-full">
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-800">Daftar Kendala</h2>
@@ -460,7 +441,6 @@ const logoRef = useRef(null);
           {showExportOptions && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
               <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl relative">
-              {/* Tombol X di pojok kanan atas */}
               <button
                 onClick={() => {
                   setShowExportOptions(false);
@@ -476,8 +456,8 @@ const logoRef = useRef(null);
                 <button
           className="block w-full text-left px-4 py-2 rounded hover:bg-blue-100"
           onClick={() => {
-            handleExport(); // jalankan export excel
-            setShowExportOptions(false); // popup langsung hilang
+            handleExport(); 
+            setShowExportOptions(false); 
           }}
         >
           Excel (.xlsx)
@@ -486,16 +466,14 @@ const logoRef = useRef(null);
         <button
           className="block w-full text-left px-4 py-2 rounded hover:bg-blue-100"
           onClick={() => {
-            handleExportPDF(); // jalankan export pdf
-            setShowExportOptions(false); // popup langsung hilang
+            handleExportPDF(); 
+            setShowExportOptions(false); 
           }}
         >
           PDF (.pdf)
         </button>
 
       </div>
-        {/* Tombol Batal */}
-       
       </div>
     </div>
   )}
@@ -581,77 +559,86 @@ const logoRef = useRef(null);
             <div className="text-center py-10 text-gray-500">Memuat data...</div>
           ) : (
             <div className="">
-     <div className="overflow-y-auto max-h-[600px] rounded border">
-  <table className="w-full divide-y divide-gray-200 text-xs">
-    <thead className="bg-gray-100 sticky top-0 z-10">
-      <tr>
-        <th className="px-2 py-1">No</th>
-        <th className="px-2 py-1">Status Pendaftar</th>
-        <th className="px-2 py-1">Kode</th>
-        <th className="px-2 py-1">Kategori</th>
-        <th className="px-2 py-1">Nama</th>
-        <th className="px-2 py-1">Kendala</th>
-        <th className="px-2 py-1">Tindak Lanjut</th>
-        <th className="px-2 py-1">No WA</th>
-        <th className="px-2 py-1">Status</th>
-        <th className="px-2 py-1">Penanganan</th>
-        <th className="px-2 py-1">Selesai</th>
-        <th className="px-2 py-1">Petugas</th>
-        <th className="px-2 py-1">Aksi</th>
-      </tr>
-    </thead>
-    <tbody className="text-gray-800">
-      {paginatedKendala.map((item, idx) => (
-        <tr key={item.id} className="border-t">
-          <td className="px-2 py-1 text-center">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-          <td className="px-2 py-1 capitalize">{item.status_pendaftar}</td>
-          <td className="px-2 py-1 capitalize">{item.kode_pendaftar}</td>
-          <td className="px-2 py-1 capitalize">{item.kategori?.nama_kategori}</td>
-          <td className="px-2 py-1 capitalize">{item.nama}</td>
-          <td className="px-4 py-2 text-sm text-gray-700 break-words max-w-xs"> {item.kendala}</td>
-          <td className="px-4 py-2 text-sm text-gray-700 break-words max-w-xs"> {item.tindak_lanjut}</td>
-          <td className="px-2 py-1">{item.no_wa}</td>
-          <td className="px-2 py-1">
-            {item.status === 'Selesai' ? (
-              <span className="bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
-                Selesai
-              </span>
-            ) : (
-              <span className="bg-yellow-100 text-yellow-800 px-1.5 py-0.5 rounded-full text-[10px] font-medium">
-                Diproses
-              </span>
-            )}
-          </td>
-          <td className="px-2 py-1">{item.tanggal_penanganan}</td>
-          <td className="px-2 py-1">{item.tanggal_selesai}</td>
-          <td className="px-2 py-1 text-center">
-            {item.petugas?.nama_pengguna ? (
-              <div className="bg-gray-200 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px]">
-                <UserIcon className="w-3 h-3 mr-1 text-gray-700" />
-                {item.petugas.nama_pengguna}
-              </div>
-            ) : (
-              <span className="italic text-gray-400">Tidak Ada</span>
-            )}
-          </td>
-          <td className="px-2 py-1 flex gap-1 justify-center">
-            <Link to={`/kendala/edit/${item.id}`}>
-              <button className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-1.5 rounded-full">
-                <PencilIcon className="h-3 w-3" />
-              </button>
-            </Link>
-            <button
-              onClick={() => handleDelete(item.id)}
-              className="bg-red-100 hover:bg-red-200 text-red-700 p-1.5 rounded-full"
-            >
-              <TrashIcon className="h-3 w-3" />
-            </button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+     
+     {/* --- UPDATE: PERBAIKAN TAMPILAN TABEL --- */}
+     <div className="overflow-auto max-h-[600px] rounded border shadow-sm">
+      <table className="min-w-max w-full divide-y divide-gray-200 text-xs">
+        <thead className="bg-gray-100 sticky top-0 z-10">
+          <tr>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">No</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Status Pendaftar</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Kode</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Kategori</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Fakultas</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Prodi</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Nama</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Kendala</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Tindak Lanjut</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">No WA</th>
+            <th className="px-3 py-2 whitespace-nowrap text-center font-medium text-gray-600">Status</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Penanganan</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Selesai</th>
+            <th className="px-3 py-2 whitespace-nowrap text-left font-medium text-gray-600">Petugas</th>
+            <th className="px-3 py-2 whitespace-nowrap text-center font-medium text-gray-600">Aksi</th>
+          </tr>
+        </thead>
+        <tbody className="text-gray-800 bg-white">
+          {paginatedKendala.map((item, idx) => (
+            <tr key={item.id} className="border-b hover:bg-gray-50 transition-colors">
+              <td className="px-3 py-2 text-center whitespace-nowrap">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+              <td className="px-3 py-2 capitalize whitespace-nowrap">{item.status_pendaftar}</td>
+              <td className="px-3 py-2 whitespace-nowrap">{item.kode_pendaftar}</td>
+              <td className="px-3 py-2 capitalize whitespace-nowrap">{item.kategori?.nama_kategori || '-'}</td>
+              <td className="px-3 py-2 uppercase font-medium whitespace-nowrap">{item.fakultas || '-'}</td>
+              <td className="px-3 py-2 capitalize whitespace-nowrap">{item.pilihan_pertama || '-'}</td>
+              <td className="px-3 py-2 capitalize whitespace-nowrap">{item.nama}</td>
+              
+              {/* Kolom teks panjang tetap wrap, tapi dibatasi lebarnya */}
+              <td className="px-3 py-2 text-gray-700 break-words whitespace-normal min-w-[200px] max-w-xs">{item.kendala}</td>
+              <td className="px-3 py-2 text-gray-700 break-words whitespace-normal min-w-[200px] max-w-xs">{item.tindak_lanjut}</td>
+              
+              <td className="px-3 py-2 whitespace-nowrap">{item.no_wa}</td>
+              <td className="px-3 py-2 text-center whitespace-nowrap">
+                {item.status === 'Selesai' ? (
+                  <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-[10px] font-medium">
+                    Selesai
+                  </span>
+                ) : (
+                  <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-[10px] font-medium">
+                    Diproses
+                  </span>
+                )}
+              </td>
+              <td className="px-3 py-2 whitespace-nowrap">{item.tanggal_penanganan}</td>
+              <td className="px-3 py-2 whitespace-nowrap">{item.tanggal_selesai}</td>
+              <td className="px-3 py-2 whitespace-nowrap">
+                {item.petugas?.nama_pengguna ? (
+                  <div className="bg-gray-200 inline-flex items-center px-2 py-1 rounded-full text-[10px]">
+                    <UserIcon className="w-3 h-3 mr-1 text-gray-700" />
+                    {item.petugas.nama_pengguna}
+                  </div>
+                ) : (
+                  <span className="italic text-gray-400">Tidak Ada</span>
+                )}
+              </td>
+              <td className="px-3 py-2 flex gap-2 justify-center whitespace-nowrap">
+                <Link to={`/kendala/edit/${item.id}`}>
+                  <button className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 p-1.5 rounded-full transition">
+                    <PencilIcon className="h-4 w-4" />
+                  </button>
+                </Link>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="bg-red-100 hover:bg-red-200 text-red-700 p-1.5 rounded-full transition"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
          
             </div>
@@ -773,6 +760,6 @@ const logoRef = useRef(null);
     </Layout>
   );
   
-                  };
+};
 
 export default DaftarKendala;

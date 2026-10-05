@@ -20,6 +20,7 @@ const Dashboard = () => {
     }
   
     // Fetch dua sekaligus
+// Fetch dua sekaligus
     const fetchData = async () => {
       try {
         const [kendalaRes, kategoriRes] = await Promise.all([
@@ -27,8 +28,19 @@ const Dashboard = () => {
           api.get('/kategori-kendala')
         ]);
         
-        setKendala(kendalaRes.data);
-        setKategoriList(kategoriRes.data);
+        // --- PERBAIKAN: Pastikan formatnya selalu Array ---
+        const dataKendala = Array.isArray(kendalaRes.data) 
+          ? kendalaRes.data 
+          : (kendalaRes.data?.data || []); // Ambil .data jika bentuknya pagination
+          
+        const dataKategori = Array.isArray(kategoriRes.data)
+          ? kategoriRes.data
+          : (kategoriRes.data?.data || []);
+
+        setKendala(dataKendala);
+        setKategoriList(dataKategori);
+        // --------------------------------------------------
+
       } catch (error) {
         console.error('Gagal ambil data:', error);
       }

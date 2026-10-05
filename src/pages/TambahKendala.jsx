@@ -11,10 +11,14 @@ const TambahKendala = () => {
   const [dataPetugas, setDataPetugas] = useState([]);
   const navigate = useNavigate();
   const [kategoriList, setKategoriList] = useState([]);
+  
+  // --- UPDATE: Tambahkan fakultas dan pilihan_pertama di state awal ---
   const [formData, setFormData] = useState({
     status_pendaftar: '',
     kode_pendaftar: '',
     nama: '',
+    fakultas: '',          // Tambahan baru
+    pilihan_pertama: '',   // Tambahan baru
     kendala: '',
     tindak_lanjut: '',
     no_wa: '',
@@ -24,13 +28,14 @@ const TambahKendala = () => {
     petugas_id: '',
     kategori_id: ''
   });
- 
 
   useEffect(() => {
     const fetchPetugas = async () => {
       try {
         const response = await api.get('/petugas');
-        setDataPetugas(response.data);
+        // --- PERBAIKAN: Pastikan formatnya selalu Array ---
+        const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        setDataPetugas(data);
       } catch (error) {
         console.error('Gagal fetch petugas:', error);
       }
@@ -38,21 +43,22 @@ const TambahKendala = () => {
 
     fetchPetugas();
   }, []);
+
   useEffect(() => {
     const fetchKategori = async () => {
       try {
         const response = await api.get('/kategori-kendala');
-        setKategoriList(response.data);
+        // --- PERBAIKAN: Pastikan formatnya selalu Array ---
+        const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        setKategoriList(data);
       } catch (error) {
-        console.error('Gagal ambil data kategori:', error); // perbaikan: pakai "error" bukan "err" dan hapus tanda kurung tutup ganda
+        console.error('Gagal ambil data kategori:', error);
       }
     };
   
-    fetchKategori(); // panggil fungsi setelah didefinisikan
+    fetchKategori();
   }, []);
-  
-   
-
+    
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -68,9 +74,7 @@ const TambahKendala = () => {
         ...formData,
         [name]: value
       });
-
     }
-   
   };
 
   const handleSubmit = async (e) => {
@@ -101,43 +105,37 @@ const TambahKendala = () => {
     }
   };
   
-  
-useEffect(() => {
-  const fetchSaran = async () => {
-    if (kodePendaftar.length >= 3) {
-      try {
-        const res = await api.get(`/pendaftar/search?kode=${kodePendaftar}`);
+  useEffect(() => {
+    const fetchSaran = async () => {
+      if (kodePendaftar.length >= 3) {
+        try {
+          const res = await api.get(`/pendaftar/search?kode=${kodePendaftar}`);
 
-        // Hapus duplikat berdasarkan kode_pendaftar
-        const uniqueSuggestions = [];
-        const seen = new Set();
+          const uniqueSuggestions = [];
+          const seen = new Set();
 
-        res.data.forEach(item => {
-          if (!seen.has(item.kode_pendaftar)) {
-            seen.add(item.kode_pendaftar);
-            uniqueSuggestions.push(item);
-          }
-        });
+          res.data.forEach(item => {
+            if (!seen.has(item.kode_pendaftar)) {
+              seen.add(item.kode_pendaftar);
+              uniqueSuggestions.push(item);
+            }
+          });
 
-        setSaranKode(uniqueSuggestions);
-      } catch (err) {
-        console.error('Gagal fetch saran kode:', err);
+          setSaranKode(uniqueSuggestions);
+        } catch (err) {
+          console.error('Gagal fetch saran kode:', err);
+          setSaranKode([]);
+        }
+      } else {
         setSaranKode([]);
       }
-    } else {
-      setSaranKode([]);
-    }
-  };
+    };
 
-  fetchSaran();
-}, [kodePendaftar]);
-
-const [loadingSaran, setLoadingSaran] = useState(false);
-
+    fetchSaran();
+  }, [kodePendaftar]);
 
   return (
     <Layout>
-      
       <div className="bg-white rounded-lg shadow-md p-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold">Tambah Kendala</h2>
@@ -151,20 +149,18 @@ const [loadingSaran, setLoadingSaran] = useState(false);
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-1">
-              {/* Status Pendaftar */}
               <label className="block font-medium mb-1">Status Pendaftar</label>
               <select
-              name="status_pendaftar"
-              value={formData.status_pendaftar}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFormData({ ...formData, status_pendaftar: value });
-                setStatus_pendaftar(value);
-                if (value === 'peminat') {
-                  setFormData((prev) => ({ ...prev, kode_pendaftar: '' }));
-                }
-              }}
-
+                name="status_pendaftar"
+                value={formData.status_pendaftar}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData({ ...formData, status_pendaftar: value });
+                  setStatus_pendaftar(value);
+                  if (value === 'peminat') {
+                    setFormData((prev) => ({ ...prev, kode_pendaftar: '' }));
+                  }
+                }}
                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
                 required
               >
@@ -193,7 +189,6 @@ const [loadingSaran, setLoadingSaran] = useState(false);
                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
               />
               
-              {/* Tampilkan saran */}
               {saranKode.length > 0 && (
                 <ul className="absolute bg-white border rounded mt-1 shadow max-h-40 overflow-y-auto z-10 ">
                  {saranKode.map((item, index) => (
@@ -219,8 +214,6 @@ const [loadingSaran, setLoadingSaran] = useState(false);
               )}
             </>
           )}
-          
-
 
               <label className="block font-medium mb-1 mt-4">Nama</label>
               <input
@@ -230,7 +223,37 @@ const [loadingSaran, setLoadingSaran] = useState(false);
                 className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
                 placeholder="Masukkan Nama"
               />
+
+              {/* --- UPDATE: Input Fakultas --- */}
+              <label className="block font-medium mb-1 mt-4">Fakultas</label>
+              <select
+                name="fakultas"
+                value={formData.fakultas}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
+              >
+                <option value="">-- Pilih Fakultas --</option>
+                <option value="FAI">Agama Islam (FAI)</option>
+                <option value="FE">Ekonomi dan Bisnis (FE)</option>
+                <option value="FT">Teknik dan Sains (FT)</option>
+                <option value="FKIP">Keguruan dan Ilmu Pendidikan (FKIP)</option>
+                <option value="FH">Hukum (FH)</option>
+                <option value="FIKES">Ilmu Kesehatan (FIKES)</option>
+              </select>
+
+              {/* --- UPDATE: Input Pilihan Pertama --- */}
+              <label className="block font-medium mb-1 mt-4">Pilihan Pertama (Prodi)</label>
+              <input
+                name="pilihan_pertama"
+                value={formData.pilihan_pertama}
+                onChange={handleChange}
+                className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
+                placeholder="Contoh: Teknik Informatika"
+              />
+
             </div>
+            
+            {/* Kolom Kanan */}
             <div>
             <label className="block font-medium mb-1">Kategori Kendala</label>
             <select
@@ -248,7 +271,6 @@ const [loadingSaran, setLoadingSaran] = useState(false);
               ))}
             </select>
  
-            
               <label className="block font-medium mb-1 mt-4">Deskripsi Kendala</label>
               <textarea
                 name="kendala"
@@ -339,8 +361,6 @@ const [loadingSaran, setLoadingSaran] = useState(false);
               />
             </div>
 
-           
-
             <div className="md:col-span-2 text-right">
               <button
                 type="submit"
@@ -350,23 +370,6 @@ const [loadingSaran, setLoadingSaran] = useState(false);
               </button>
             </div>
           </form>
-          {/* {riwayatKendala.length > 0 && (
-  <div className="mt-6 border-t pt-4">
-    <h4 className="font-semibold mb-2">Riwayat Kendala Sebelumnya:</h4>
-    <ul className="space-y-2 text-sm">
-      {riwayatKendala.map((item, index) => (
-        <li key={item.id} className="bg-gray-50 p-3 border rounded">
-          <strong>{index + 1}. {item.kendala}</strong><br />
-          Status: {item.status} <br />
-          Tanggal Penanganan: {item.tanggal_penanganan || '-'} <br />
-          Tanggal Selesai: {item.tanggal_selesai || ''} <br />
-          Petugas: {item.petugas?.nama_pengguna || ''}
-        </li> */}
-      {/* ))}
-    </ul>
-  </div>
-)} */}
-
         </div>
     </Layout>
   );

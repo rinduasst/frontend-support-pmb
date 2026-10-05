@@ -34,20 +34,20 @@ const Header = ({ toggleSidebar }) => {
   }, []);
 
   return (
- 
-      <div className="w-full bg-white shadow-md px-8 py-4 flex justify-between items-center border-b sticky top-0 z-50">
-        <div className="flex items-center gap-4">
-          <button onClick={toggleSidebar} className="text-gray-700 hover:text-gray-900 text-2xl">
-            <FaBars />
-          </button>
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Selamat Datang, {namaPetugas}</h1>
-            <p className="text-gray-600 text-sm">Support PMB</p>
-          </div>
+    // --- PERBAIKAN: Ubah z-50 menjadi z-30 di baris bawah ini ---
+    <div className="w-full bg-white shadow-md px-8 py-4 flex justify-between items-center border-b sticky top-0 z-30">
+      <div className="flex items-center gap-4">
+        <button onClick={toggleSidebar} className="text-gray-700 hover:text-gray-900 text-2xl">
+          <FaBars />
+        </button>
+        <div>
+          <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Selamat Datang, {namaPetugas}</h1>
+          <p className="text-gray-600 text-sm">Support PMB</p>
         </div>
-        <div className="text-sm text-gray-600">{currentTime}</div>
       </div>
-    );
-  };
+      <div className="text-sm text-gray-600">{currentTime}</div>
+    </div>
+  );
+};
 
 export default Header;

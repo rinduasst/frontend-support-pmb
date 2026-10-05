@@ -11,6 +11,8 @@ const EditKendala = () => {
    status_pendaftar:'',
     kode_pendaftar: '',
     nama: '',
+    fakultas: '',           // --- TAMBAHAN BARU ---
+    pilihan_pertama: '',    // --- TAMBAHAN BARU ---
     kendala: '',
     tindak_lanjut: '',
     no_wa: '',
@@ -21,7 +23,6 @@ const EditKendala = () => {
     kendalaBaru: '',
     kategori_id:''
   });
-  
   
   const [showTambahKendala, setShowTambahKendala] = useState(false);
   const [dataPetugas, setDataPetugas] = useState([]);
@@ -36,7 +37,6 @@ const EditKendala = () => {
     kategori_id:''
   });
   
-
 useEffect(() => {
   const fetchData = async () => {
     try {
@@ -48,13 +48,13 @@ useEffect(() => {
 
       const kendalaRes = await api.get(`/kendala/${id}`);
       const data = kendalaRes.data;
- 
-      
 
       setFormData({
         status_pendaftar: data.status_pendaftar || '',
         kode_pendaftar: data.kode_pendaftar || '',
         nama: data.nama || '',
+        fakultas: data.fakultas || '',                   // --- TAMBAHAN BARU ---
+        pilihan_pertama: data.pilihan_pertama || '',     // --- TAMBAHAN BARU ---
         kendala: data.kendala || '',
         tindak_lanjut: data.tindak_lanjut || '',
         no_wa: data.no_wa || '',
@@ -85,10 +85,8 @@ const handleChange = (e) => {
 
   setFormData({ ...formData, [name]: value });
 };
-const handleUpdateKendala = async () => {
-  // Validasi kode_pendaftar jika status adalah "pendaftar"
-  console.log('Status yang dikirim:', formData.status);
 
+const handleUpdateKendala = async () => {
   if (formData.status_pendaftar === 'pendaftar') {
     if (!formData.kode_pendaftar || isNaN(formData.kode_pendaftar)) {
       alert('Kode pendaftar wajib diisi dan harus berupa angka.');
@@ -96,11 +94,12 @@ const handleUpdateKendala = async () => {
     }
   }
   
-
   const payload = {
     status_pendaftar: formData.status_pendaftar,
     kode_pendaftar: formData.status_pendaftar === 'pendaftar' ? formData.kode_pendaftar : null,
     nama: formData.nama,
+    fakultas: formData.fakultas,                 // --- TAMBAHAN BARU ---
+    pilihan_pertama: formData.pilihan_pertama,   // --- TAMBAHAN BARU ---
     kendala: formData.kendala,
     tindak_lanjut: formData.tindak_lanjut,
     no_wa: formData.no_wa,
@@ -112,7 +111,7 @@ const handleUpdateKendala = async () => {
   };
 
   try {
-    const res = await api.put(`/kendala/${id}`, payload);
+    await api.put(`/kendala/${id}`, payload);
     alert('Data kendala berhasil diperbarui.');
     navigate('/kendala', { state: { updated: true } });
   } catch (error) {
@@ -133,6 +132,8 @@ const handleTambahKendalaBaru = async () => {
     status_pendaftar: formData.status_pendaftar,
     kode_pendaftar: formData.status_pendaftar === 'pendaftar' ? formData.kode_pendaftar : null,
     nama: formData.nama,
+    fakultas: formData.fakultas,                 // --- TAMBAHAN BARU (Bawa data fakultas sebelumnya) ---
+    pilihan_pertama: formData.pilihan_pertama,   // --- TAMBAHAN BARU (Bawa data prodi sebelumnya) ---
     kendala: formKendalaBaru.kendala,
     tindak_lanjut: formKendalaBaru.tindak_lanjut || '',
     no_wa: formData.no_wa,
@@ -147,7 +148,6 @@ const handleTambahKendalaBaru = async () => {
     await api.post('/kendala', newKendala);
     alert("Kendala baru berhasil ditambahkan.");
     navigate('/kendala');
-
 
     setFormKendalaBaru({
       kendala: '',
@@ -171,10 +171,8 @@ const [riwayatKendala, setRiwayatKendala] = useState([]);
 useEffect(() => {
   if (formData.kode_pendaftar) {
     api.get(`/kendala/kode/${formData.kode_pendaftar}`)
-
       .then(res => {
         const semuaKendala = res.data;
-
         // Filter riwayat: buang kendala yang sedang diedit (pakai id)
         const riwayat = semuaKendala.filter(k => k.id !== parseInt(id));
         setRiwayatKendala(riwayat);
@@ -184,10 +182,6 @@ useEffect(() => {
       });
   }
 }, [formData.kode_pendaftar, id]);
-
-
-
-
   
   return (
     <Layout>
@@ -217,7 +211,6 @@ useEffect(() => {
 
               {formData.status_pendaftar === 'pendaftar' && (
                 <>
-                
                   <label className="block font-medium mb-1 mt-4 ">Kode Pendaftar</label>
                   <input
                     type="text"
@@ -249,17 +242,40 @@ useEffect(() => {
             <input
             name="kendala"
             value={formData.kendala}
-            onChange={handleChange}  // <--- tambahkan ini
+            onChange={handleChange}  
             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
             rows={4}
 />
-
           </div>
   
           <div>
             <label className="block font-medium mb-1">Nama</label>
             <input name="nama" value={formData.nama} onChange={handleChange}
               className="w-full border px-3 py-2 rounded focus:outline-none focus:ring" />
+          </div>
+
+          {/* --- TAMBAHAN BARU: Input Fakultas --- */}
+          <div>
+            <label className="block font-medium mb-1">Fakultas</label>
+            <select name="fakultas" value={formData.fakultas} onChange={handleChange}
+              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring"
+            >
+              <option value="">-- Pilih Fakultas --</option>
+              <option value="FAI">Agama Islam (FAI)</option>
+              <option value="FE">Ekonomi dan Bisnis (FE)</option>
+              <option value="FT">Teknik dan Sains (FT)</option>
+              <option value="FKIP">Keguruan dan Ilmu Pendidikan (FKIP)</option>
+              <option value="FH">Hukum (FH)</option>
+              <option value="FIKES">Ilmu Kesehatan (FIKES)</option>
+            </select>
+          </div>
+
+          {/* --- TAMBAHAN BARU: Input Pilihan Pertama --- */}
+          <div>
+            <label className="block font-medium mb-1">Pilihan Pertama (Prodi)</label>
+            <input name="pilihan_pertama" value={formData.pilihan_pertama} onChange={handleChange}
+              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring" 
+              placeholder="Contoh: Teknik Informatika" />
           </div>
           
   
@@ -284,8 +300,6 @@ useEffect(() => {
               <option value="Selesai">Selesai</option>
             </select>
           </div>
-  
-          
   
           <div>
             <label className="block font-medium mb-1">Tanggal Penanganan</label>
@@ -316,11 +330,6 @@ useEffect(() => {
           </div>
           </form>
 
-
-
-
-
-
           {/* TAMBAH KENDALA BARU */}
 <div className="md:col-span-2 mt-8 border-t pt-6">
   <label
@@ -331,11 +340,9 @@ useEffect(() => {
     Tambah Kendala Baru ke Riwayat
   </label>
   
-
   {showTambahKendala && (
     <div className="bg-gray-50 border p-4 rounded-lg space-y-4 mt-4">
       <div>
-
               <label className="block font-medium mb-1 mt-4 text-m text-gey-700">Kategori Kendala</label>
               <select
                 name=""
@@ -434,15 +441,11 @@ useEffect(() => {
         >
           Simpan Kendala Baru ke Daftar
         </button>
-
       </div>
     </div>
   )}
 </div>
             
-
-        
-  
 {riwayatKendala.length > 0 && (
  <div className="mt-10">
   <h3 className="text-xl font-bold mb-4 text-gray-800">
@@ -461,10 +464,6 @@ useEffect(() => {
         <span className="font-medium text-gray-700">Tanggal Penanganan:</span>{' '}
         {item.tanggal_penanganan || '-'}
       </p>
-      {/* <p className="mb-1">
-        <span className="font-medium text-gray-700">Kategori kendala:</span>{' '}
-        {item.kategori?.nama_kategori || '-'}
-      </p> */}
       <p className="mb-1">
         <span className="font-medium text-gray-700">Kendala:</span>{' '}
         {item.kendala}
@@ -503,9 +502,7 @@ useEffect(() => {
 )}
     </div>
   </Layout>
-  
   );
 };
-
 
 export default EditKendala;
